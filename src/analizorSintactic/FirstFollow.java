@@ -4,21 +4,23 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class FirstFollow {
 	
 	private Map<String, ArrayList<ArrayList<String>>> gram;
-	private Map<String, Set<String>> first;
-	private Map<String, Set<String>> follow;;
+	private Hashtable<String, HashSet<String>> first;
+	private Hashtable<String, HashSet<String>> follow;;
 
 		
 	public FirstFollow(Hashtable<String, ArrayList<ArrayList<String>>> gram){
 		this.gram = gram;
-		first = new Hashtable<String, Set<String>>();
-		follow = new Hashtable<String, Set<String>>();
+		first = new Hashtable<String, HashSet<String>>();
+		follow = new Hashtable<String, HashSet<String>>();
 		firstGen();
+		followGen();
 	}
 	
 	private void firstGen(){
@@ -39,19 +41,21 @@ public class FirstFollow {
 	        		String atomProd = prods.get(i).get(j);
 	        		if(!gram.containsKey(atomProd) && !first.containsKey(atomProd)) {
 
-	        			Set<String> firstSet = new HashSet<String>();
+	        			HashSet<String> firstSet = new HashSet<String>();
 	    	        	firstSet.add(atomProd);
 	        			first.put(atomProd,firstSet);
 	        		}
 	        		
 	        	}
 	        }
-	        
-	        it.remove(); // avoids a ConcurrentModificationException
 	    }
-	    Map<String, Set<String>> firstprev;
+	    Hashtable<String, HashSet<String>> firstprev;
 	    do {
-	    	firstprev = new Hashtable<>(first);
+	    	firstprev = new Hashtable<String,HashSet<String>>();
+	    	for(Map.Entry<String,HashSet<String>> entry : first.entrySet()) {
+	    		firstprev.put(entry.getKey(),(HashSet<String>) entry.getValue().clone());
+	    	}
+	    	
 	    	
 	    	it = (Iterator) gram.entrySet().iterator();
 	   
@@ -71,7 +75,7 @@ public class FirstFollow {
 		        	else {
 			        	int i = 1;
 			        	int j = prod.size()-1;
-			        	Set<String> w = first.get(prod.get(0));	
+			        	Set<String> w = (Set<String>) first.get(prod.get(0)).clone();	
 			        	while(i <= j && first.get(prod.get(i-1)).contains("lambda") ) {
 			        		w.addAll(first.get(prod.get(i)));
 			        		i++;
@@ -82,14 +86,12 @@ public class FirstFollow {
 	        			first.get(pair.getKey()).addAll(w);
 		        	}
 		        }
-		        
-		        it.remove(); // avoids a ConcurrentModificationException
 		    }
 	    }while( !firstprev.equals(first));
 	    
 	}
 	
-	private Set<String> FirstString( ArrayList<String> atomi){
+	public Set<String> FirstString( List<String> atomi){
 		
 		Set<String> w = new HashSet<String>();
 		if((atomi.contains("lambda") && atomi.size() == 1) || atomi.size() < 1)
@@ -97,15 +99,73 @@ public class FirstFollow {
 		else {
 			int i = 1;
 			int j = atomi.size();
+			w.addAll(first.get(atomi.get(0)));
 			while (i < j && first.get(atomi.get(i-1)).contains("lambda")) {
 				w.addAll(first.get(atomi.get(i)));
 				i++;
 			}
-			if( i <= j  || !first.get(atomi.get(i-1)).contains("lambda") ) {
+			if( i < j  || !first.get(atomi.get(i-1)).contains("lambda") ) {
 				w.remove("lambda");
 			}
 		}
 		return w;
+	}
+	
+	private void followGen() {
+		
+		//initializare neterminale
+		Iterator it = (Iterator) gram.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        if(pair.getKey().equals("S")) { //S simbol de start prin conventie
+	        	HashSet<String> followSet = new HashSet<String>();
+	        	followSet.add("lambda");
+	        	follow.put((String) pair.getKey(),followSet);
+	        }
+	        else
+	        	follow.put((String) pair.getKey(),new HashSet<String>());
+	    }
+	    
+	    Map<String, HashSet<String>> prevFollow;
+	    do {
+	    	prevFollow = new Hashtable<String,HashSet<String>>();
+	    	for( Map.Entry<String, HashSet<String>> entry : follow.entrySet()) {
+	    		prevFollow.put(entry.getKey(), (HashSet<String>)entry.getValue().clone());
+	    	}
+	    	
+	    	it = (Iterator) gram.entrySet().iterator();
+	 	   
+	    	ArrayList<ArrayList<String>> prods;
+		    while (it.hasNext()) {
+		        Map.Entry pair = (Map.Entry) it.next();
+		        prods = (ArrayList<ArrayList<String>>) pair.getValue();
+		        for( ArrayList<String> prod : prods) {
+		        	
+		        	Set<String> netGenSet = follow.get(pair.getKey());
+		        	
+		        	for( int j = 0; j < prod.size(); j++) {
+		        		if(gram.containsKey(prod.get(j))) {
+			        		Set<String> M = FirstString(prod.subList(j+1, prod.size())); 
+			        		Set<String> crtNetProdSet = follow.get(prod.get(j));
+			        		if( j == prod.size()-1 ) {
+			        			crtNetProdSet.addAll(netGenSet);	
+			        		}
+			        		else if(M.contains("lambda")) {
+			        			M.remove("lambda");
+			        			crtNetProdSet.addAll(netGenSet);
+			        			crtNetProdSet.addAll(M);
+			        		}
+			        		else {
+			        			crtNetProdSet.addAll(M);
+			        		}
+		        		}
+		        	}
+		        }
+		    }
+	    	
+	    	
+	    }while( !prevFollow.equals(follow));
+	    
 	}
 
 }
