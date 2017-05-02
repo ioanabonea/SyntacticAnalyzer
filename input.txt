@@ -1,7 +1,5 @@
-S -> T E'
-E' -> + T E' | lambda
-T -> F T'
-T' -> * F T' | lambda
-F -> v | ( S )
+S -> A B
+A -> a | lambda
+B -> b | lambda
 
-v + ( v + ( v ) )
+b 

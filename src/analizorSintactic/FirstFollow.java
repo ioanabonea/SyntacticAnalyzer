@@ -32,10 +32,10 @@ public class FirstFollow {
 	        Map.Entry pair = (Map.Entry)it.next();
 	        prods = (ArrayList<ArrayList<String>>) pair.getValue();
 	        
-	        //init neterminale
+	        //init neterminale la multimea vida
 	        first.put((String) pair.getKey(),new HashSet<String>());
 	        
-	        //initializare cu terminale
+	        //initializare cu terminale cu el insusi
 	        for( int i = 0; i <  prods.size(); i++) {
 	        	for(int j = 0; j < prods.get(i).size(); j++) {
 	        		String atomProd = prods.get(i).get(j);
@@ -50,7 +50,7 @@ public class FirstFollow {
 	        }
 	    }
 	    Hashtable<String, HashSet<String>> firstprev;
-	    do {
+	    do { //cat timp productiile se modifica si sunt diferite de cele anterioare
 	    	firstprev = new Hashtable<String,HashSet<String>>();
 	    	for(Map.Entry<String,HashSet<String>> entry : first.entrySet()) {
 	    		firstprev.put(entry.getKey(),(HashSet<String>) entry.getValue().clone());
@@ -59,16 +59,16 @@ public class FirstFollow {
 	    	
 	    	it = (Iterator) gram.entrySet().iterator();
 	   
-		    while (it.hasNext()) {
+		    while (it.hasNext()) {  // iau fiecare neterminal in parte 
 		        Map.Entry pair = (Map.Entry) it.next();
 		        prods = (ArrayList<ArrayList<String>>) pair.getValue();
-		        for( ArrayList<String> prod : prods) {
+		        for( ArrayList<String> prod : prods) { // iau fiecare producie in parte
 		        	
-		        	if(prod.contains("lambda") && prod.size() == 1) {
+		        	if(prod.contains("lambda") && prod.size() == 1) {  // daca prod ajuns la final merge intr-un lambda
 	        			Set<String> firstSet = first.get(pair.getKey());
 	    	        	firstSet.add("lambda");
 	        		}
-		        	else if(!gram.containsKey(prod.get(0))) {
+		        	else if(!gram.containsKey(prod.get(0))) {  //daca am gasit un terminal
 		        		Set<String> firstSet = first.get(pair.getKey());
 	    	        	firstSet.add(prod.get(0));
 		        	}
@@ -119,7 +119,7 @@ public class FirstFollow {
 	        Map.Entry pair = (Map.Entry)it.next();
 	        if(pair.getKey().equals("S")) { //S simbol de start prin conventie
 	        	HashSet<String> followSet = new HashSet<String>();
-	        	followSet.add("lambda");
+	        	followSet.add("$");
 	        	follow.put((String) pair.getKey(),followSet);
 	        }
 	        else

@@ -73,7 +73,7 @@ public class Main {
 	
 	    
 	}
-	
+		
 	public static void calculTas(FirstFollow ff) {
 		
 		Iterator it = gram.entrySet().iterator();
@@ -82,15 +82,19 @@ public class Main {
 			String neterm = (String) pair.getKey();
 			for( ArrayList<String> prod : (ArrayList<ArrayList<String>>) pair.getValue()) {
 				for( String atom : ff.FirstString(prod)) {
-					Hashtable<String,ArrayList<String>> linie;
-					if(tas.containsKey(neterm)) {
-						linie = tas.get(neterm);
-					}
-					else {
-						linie = new Hashtable<String,ArrayList<String>>();
-					}
-					linie.put(atom, prod);
-					tas.put(neterm, linie);
+				
+						Hashtable<String,ArrayList<String>> linie;
+						if(tas.containsKey(neterm)) {
+							linie = tas.get(neterm);
+						}
+						else {
+							linie = new Hashtable<String,ArrayList<String>>();
+						}
+						
+						linie.put(atom, prod); 
+						tas.put(neterm, linie);
+				
+
 				}
 				if(ff.FirstString(prod).contains("lambda")) {
 					for( String atom : ff.follow.get(neterm)) {
@@ -104,7 +108,7 @@ public class Main {
 						linie.put(atom, prod);
 						tas.put(neterm, linie);
 					}
-					if(ff.follow.get(neterm).contains("lambda")) {
+					if(ff.follow.get(neterm).contains("$")) {
 						Hashtable<String,ArrayList<String>> linie;
 						if(tas.containsKey(neterm)) {
 							linie = tas.get(neterm);
