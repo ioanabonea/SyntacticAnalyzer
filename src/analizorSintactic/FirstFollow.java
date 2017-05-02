@@ -11,8 +11,8 @@ import java.util.Set;
 public class FirstFollow {
 	
 	private Map<String, ArrayList<ArrayList<String>>> gram;
-	private Hashtable<String, HashSet<String>> first;
-	private Hashtable<String, HashSet<String>> follow;;
+	public Hashtable<String, HashSet<String>> first;
+	public Hashtable<String, HashSet<String>> follow;;
 
 		
 	public FirstFollow(Hashtable<String, ArrayList<ArrayList<String>>> gram){
